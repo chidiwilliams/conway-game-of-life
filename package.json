@@ -1,0 +1,24 @@
+{
+  "name": "simulation-template",
+  "version": "1.0.0",
+  "description": "Template for simulation repositories",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf .parcel-cache && rm -rf dist && parcel build *.html --public-url .",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chidiwilliams/simulation-template.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chidiwilliams/simulation-template/issues"
+  },
+  "homepage": "https://github.com/chidiwilliams/simulation-template#readme",
+  "devDependencies": {
+    "gh-pages": "^3.2.3",
+    "parcel": "^2.0.0-rc.0"
+  }
+}
