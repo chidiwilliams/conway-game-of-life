@@ -1,22 +1,22 @@
 {
-  "name": "simulation-template",
+  "name": "conway-game-of-life",
   "version": "1.0.0",
   "description": "Template for simulation repositories",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node index.test.js",
     "build": "rm -rf .parcel-cache && rm -rf dist && parcel build *.html --public-url .",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chidiwilliams/simulation-template.git"
+    "url": "git+https://github.com/chidiwilliams/conway-game-of-life.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chidiwilliams/simulation-template/issues"
+    "url": "https://github.com/chidiwilliams/conway-game-of-life/issues"
   },
-  "homepage": "https://github.com/chidiwilliams/simulation-template#readme",
+  "homepage": "https://github.com/chidiwilliams/conway-game-of-life#readme",
   "devDependencies": {
     "gh-pages": "^3.2.3",
     "parcel": "^2.0.0-rc.0"
