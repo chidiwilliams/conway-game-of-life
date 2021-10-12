@@ -8,8 +8,21 @@ assert.deepStrictEqual(
     [false, false, false],
   ]),
   [
-    [ false, true, false ],
-    [ false, true, false ],
-    [ false, true, false ]
-  ]
+    [false, true, false],
+    [false, true, false],
+    [false, true, false],
+  ],
+);
+
+assert.deepStrictEqual(
+  next([
+    [true, false, false],
+    [true, true, true],
+    [false, false, false],
+  ]),
+  [
+    [true, false, false],
+    [true, true, false],
+    [false, true, false],
+  ],
 );

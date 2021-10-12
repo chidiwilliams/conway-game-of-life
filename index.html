@@ -4,11 +4,63 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Conway's Game of Life</title>
     <link rel="stylesheet" type="text/css" href="styles.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      .game {
+        background: #000;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .game__display {
+        flex: 1;
+      }
+
+      .game__controls {
+        padding: 20px;
+        border-top: solid 1px #999999;
+      }
+
+      .cell {
+        stroke: #555555;
+      }
+
+      .cell.live {
+        fill: #ffffff;
+        stroke: #555555;
+      }
+
+      svg {
+        display: block;
+      }
+    </style>
   </head>
 
   <body>
-    <script src="index.js" type="module"></script>
+    <div class="game">
+      <div class="game__display"></div>
+      <div class="game__controls">
+        <div class="">Conway's Game of Life</div>
+        <button id="start">Start</button>
+        <button id="reset">Reset</button>
+        <div class="">Generations: <span id="generations-count">0</span></div>
+      </div>
+    </div>
+
+    <script src="demo.js" type="module"></script>
   </body>
 </html>
