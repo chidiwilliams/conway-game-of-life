@@ -16,14 +16,20 @@
         margin: 0;
         height: 100%;
         box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica,
+          Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.4;
+        font-size: 14px;
       }
 
       .game {
-        background: #000;
+        background: #222222;
         color: #fff;
         display: flex;
         flex-direction: column;
         height: 100%;
+        position: relative;
       }
 
       .game__display {
@@ -31,8 +37,42 @@
       }
 
       .game__controls {
-        padding: 20px;
-        border-top: solid 1px #999999;
+        padding: 12px;
+        border: solid 1px #777777;
+        border-radius: 3px;
+        background: #191919bb;
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        width: 400px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .game-controls__title {
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+
+      .game-controls__buttons {
+        display: flex;
+        margin-bottom: 8px;
+      }
+
+      .game-controls__buttons > button {
+        flex: 1;
+        padding: 8px;
+        margin: 0 4px;
+      }
+
+      .game-controls__details {
+        display: flex;
+        margin-bottom: 8px;
+      }
+
+      .game-controls__details > * {
+        flex: 1;
       }
 
       .cell {
@@ -47,17 +87,31 @@
       svg {
         display: block;
       }
+
+      span {
+        font-weight: bold;
+      }
     </style>
   </head>
 
   <body>
     <div class="game">
-      <div class="game__display"></div>
+      <canvas class="game__display"></canvas>
       <div class="game__controls">
-        <div class="">Conway's Game of Life</div>
-        <button id="start">Start</button>
-        <button id="reset">Reset</button>
-        <div class="">Generations: <span id="generations-count">0</span></div>
+        <div class="game-controls__title">Conway's Game of Life</div>
+        <div class="game-controls__buttons">
+          <button id="start">Play (P)</button>
+          <button id="random">Random (R)</button>
+          <button id="clear">Clear (C)</button>
+        </div>
+        <div class="game-controls__details">
+          <div>Generations: <span id="generations-count">0</span></div>
+          <div>Population: <span id="population-count">0</span></div>
+        </div>
+        <div class="speed-control">
+          <div>Speed: <span id="speed-value">1</span> generation(s)/sec</div>
+          <input type="range" id="speed" min="0.1" max="7.07" step="0.1" />
+        </div>
       </div>
     </div>
 
