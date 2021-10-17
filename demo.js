@@ -1,4 +1,13 @@
 const { next } = require('.');
+const {
+  random,
+  create,
+  getPopulation,
+  encode,
+  decode,
+  dim,
+  pad,
+} = require('./demo-grids-helper');
 
 const graphics = (() => {
   let previousGrid;
@@ -56,145 +65,75 @@ const graphics = (() => {
   return { render, resizeCanvasToDisplaySize, requestAnimationFrame };
 })();
 
-const grids = (() => {
-  function create(w, h, valFunc = (i, j) => false) {
-    const grid = [];
-    for (let i = 0; i < h; i++) {
-      const r = [];
-      for (let j = 0; j < w; j++) {
-        r.push(valFunc(i, j));
-      }
-      grid.push(r);
-    }
-
-    return grid;
-  }
-
-  function random(w, h, fractionLive = 0.25) {
-    const b = 0.8;
-    return create(w, h, (i, j) => {
-      return (
-        // Cover only the middle b% of the grid
-        i / h > 1 - b &&
-        i / h < b &&
-        j / w > 1 - b &&
-        j / w < b &&
-        Math.random() < fractionLive
-      );
-    });
-  }
-
-  function getPopulation(grid) {
-    let c = 0;
-
-    for (let i = 0; i < grid.length; i++) {
-      for (let j = 0; j < grid[i].length; j++) {
-        if (grid[i][j]) {
-          c++;
-        }
-      }
-    }
-
-    return c;
-  }
-
-  return { random, create, getPopulation };
-})();
-
 const game = (() => {
   const generationsCountElement = document.getElementById('generations-count');
   const populationCountElement = document.getElementById('population-count');
   const startButtonElement = document.getElementById('start');
   const clearButtonElement = document.getElementById('clear');
+  const resetButtonElement = document.getElementById('reset');
   const randomButtonElement = document.getElementById('random');
   const speedControlElement = document.getElementById('speed');
   const speedValueElement = document.getElementById('speed-value');
   const canvasElement = document.querySelector('canvas');
 
-  let cellWidthInPixels;
+  const hotkeys = {
+    P: onClickPlay,
+    C: onClickClear,
+    R: onClickRandom,
+    O: onClickReset,
+  };
 
-  let _grid,
+  let cellWidthInPixels,
+    _grid,
+    _initialGrid,
     _isPlaying = false,
     _numGens = 0,
     w,
     h,
-    speed;
+    speed,
+    isMouseBeingDragged = false,
+    dragValue, // value the cells dragged over should be
+    isPlayingBeforeDrag;
 
   function updateGrid(gridFunc) {
-    _grid = gridFunc(_grid);
+    const newGrid = gridFunc(_grid);
+    if (newGrid === undefined) {
+      return;
+    }
+
+    console.log(encode(newGrid));
+    _grid = newGrid;
     graphics.render(canvasElement, _grid, cellWidthInPixels);
-    populationCountElement.textContent = String(grids.getPopulation(_grid));
+    populationCountElement.textContent = String(getPopulation(_grid));
   }
 
   function init() {
-    cellWidthInPixels = getCellWidth();
-    initSpeed();
-
-    w = Math.ceil(window.innerWidth / cellWidthInPixels);
-    h = Math.ceil(window.innerHeight / cellWidthInPixels);
-
     startButtonElement.addEventListener('click', onClickPlay);
     clearButtonElement.addEventListener('click', onClickClear);
+    resetButtonElement.addEventListener('click', onClickReset);
     randomButtonElement.addEventListener('click', onClickRandom);
     speedControlElement.addEventListener('change', onChangeSpeed);
 
     document.addEventListener('keydown', onKeyDown);
 
-    // Event listeners for dragging
-    {
-      let isMouseBeingDragged = false;
-      let dragValue; // value the cells dragged over should be
-      let isPlayingBeforeDrag;
-
-      canvasElement.addEventListener('mousedown', (evt) => {
-        isMouseBeingDragged = true;
-        isPlayingBeforeDrag = _isPlaying;
-        setIsPlaying(false);
-
-        const { col, row } = getRowAndCol(evt);
-        dragValue = !_grid[row][col];
-        updateGrid((grid) => setCellValue(grid, row, col));
-      });
-
-      canvasElement.addEventListener('mousemove', (evt) => {
-        if (isMouseBeingDragged) {
-          const { col, row } = getRowAndCol(evt);
-          updateGrid((grid) => setCellValue(grid, row, col));
-        }
-      });
-
-      canvasElement.addEventListener('mouseup', (evt) => {
-        if (isMouseBeingDragged) {
-          const { col, row } = getRowAndCol(evt);
-          updateGrid((grid) => setCellValue(grid, row, col));
-
-          isMouseBeingDragged = false;
-          isPlayingBeforeDrag && setIsPlaying(true);
-        }
-      });
-
-      function getRowAndCol(evt) {
-        return {
-          col: Math.floor(evt.clientX / cellWidthInPixels),
-          row: Math.floor(evt.clientY / cellWidthInPixels),
-        };
-      }
-
-      function setCellValue(grid, row, col) {
-        if (grid[row][col] === dragValue) {
-          return grid;
-        }
-
-        const newGrid = grid.map((row) => [...row]);
-        newGrid[row][col] = dragValue;
-        return newGrid;
-      }
-    }
+    canvasElement.addEventListener('mousedown', onMousedownCanvas);
+    canvasElement.addEventListener('mousemove', onMousemoveCanvas);
+    canvasElement.addEventListener('mouseup', onMouseupCanvas);
 
     graphics.resizeCanvasToDisplaySize(canvasElement);
 
     // Start game
-    updateGrid(() => grids.create(w, h));
+
+    initSpeed();
+    initButtons();
+
+    const { grid: initialGrid, cellWidthInPixels: cellWidth } =
+      getInitialGrid();
+    cellWidthInPixels = cellWidth;
+    _initialGrid = initialGrid;
+    h = initialGrid.length;
+    w = initialGrid[0].length;
+    updateGrid(() => initialGrid);
     graphics.requestAnimationFrame(
       () => {
         if (_isPlaying) {
@@ -206,18 +145,64 @@ const game = (() => {
     );
   }
 
-  function getCellWidth() {
+  function getInitialGrid() {
+    const url = new URL(window.location.href);
+    const init = url.searchParams.get('init');
+    if (init) {
+      const decodedGrid = decode(init);
+      const decodedH = decodedGrid.length;
+      const decodedW = decodedGrid[0] ? decodedGrid[0].length : 0;
+      const cellWidthInPixels = getCellWidth(true, decodedW, decodedH);
+
+      const padW = Math.ceil(
+        (window.innerWidth - cellWidthInPixels * decodedW) / cellWidthInPixels,
+      );
+      const padH = Math.ceil(
+        (window.innerHeight - cellWidthInPixels * decodedH) / cellWidthInPixels,
+      );
+
+      return { grid: pad(decodedGrid, padW, padH), cellWidthInPixels };
+    } else {
+      const cellWidthInPixels = getCellWidth(false);
+      return {
+        grid: create(
+          Math.ceil(window.innerWidth / cellWidthInPixels),
+          Math.ceil(window.innerHeight / cellWidthInPixels),
+        ),
+        cellWidthInPixels,
+      };
+    }
+  }
+
+  function initButtons() {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('random') === 'false') {
+      randomButtonElement.style.display = 'none';
+    }
+    if (url.searchParams.get('clear') === 'false') {
+      clearButtonElement.style.display = 'none';
+    }
+    if (url.searchParams.get('reset') === 'true') {
+      resetButtonElement.style.display = 'block';
+    }
+  }
+
+  function getCellWidth(gridSetFromUrl, w, h) {
+    if (gridSetFromUrl) {
+      return Math.ceil(
+        Math.min(window.innerHeight / +h, window.innerWidth / +w),
+      );
+    }
+
     const url = new URL(window.location.href);
     const size = url.searchParams.get('size');
-    switch (size) {
-      case 'lg':
-        return Math.max(
-          50,
-          Math.max(window.innerHeight / 50, window.innerWidth / 50),
-        );
-      default:
-        return 20;
+    if (size === 'lg') {
+      return Math.max(
+        50,
+        Math.max(window.innerHeight / 50, window.innerWidth / 50),
+      );
     }
+    return 20;
   }
 
   function initSpeed() {
@@ -239,20 +224,8 @@ const game = (() => {
 
   function onKeyDown(evt) {
     if (!evt.ctrlKey && !evt.metaKey) {
-      switch (evt.key) {
-        case 'p':
-        case 'P':
-          onClickPlay();
-          break;
-        case 'c':
-        case 'C':
-          onClickClear();
-          break;
-        case 'r':
-        case 'R':
-          onClickRandom();
-          break;
-      }
+      const func = hotkeys[evt.key.toUpperCase()];
+      func && func();
     }
   }
 
@@ -260,15 +233,20 @@ const game = (() => {
     toggleIsPlaying();
   }
 
+  function onClickReset() {
+    resetNumGens();
+    updateGrid(() => _initialGrid);
+  }
+
   function onClickClear() {
     setIsPlaying(false);
     resetNumGens();
-    updateGrid(() => grids.create(w, h));
+    updateGrid(() => create(w, h));
   }
 
   function onClickRandom() {
     resetNumGens();
-    updateGrid(() => grids.random(w, h));
+    updateGrid(() => random(w, h));
   }
 
   function incrNumGens() {
@@ -287,6 +265,53 @@ const game = (() => {
   function setIsPlaying(isPlaying) {
     _isPlaying = isPlaying;
     startButtonElement.textContent = _isPlaying ? 'Pause (P)' : 'Play (P)';
+  }
+
+  function onMousedownCanvas(evt) {
+    // left-click
+    if (evt.buttons === 1) {
+      isMouseBeingDragged = true;
+      isPlayingBeforeDrag = _isPlaying;
+      setIsPlaying(false);
+
+      const { col, row } = getRowAndCol(evt);
+      dragValue = !_grid[row][col];
+      updateGrid((grid) => setCellValue(grid, row, col));
+    }
+  }
+
+  function onMousemoveCanvas(evt) {
+    if (isMouseBeingDragged) {
+      const { col, row } = getRowAndCol(evt);
+      updateGrid((grid) => setCellValue(grid, row, col));
+    }
+  }
+
+  function onMouseupCanvas(evt) {
+    if (isMouseBeingDragged) {
+      const { col, row } = getRowAndCol(evt);
+      updateGrid((grid) => setCellValue(grid, row, col));
+
+      isMouseBeingDragged = false;
+      isPlayingBeforeDrag && setIsPlaying(true);
+    }
+  }
+
+  function getRowAndCol(evt) {
+    return {
+      col: Math.floor(evt.clientX / cellWidthInPixels),
+      row: Math.floor(evt.clientY / cellWidthInPixels),
+    };
+  }
+
+  function setCellValue(grid, row, col) {
+    if (grid[row][col] === dragValue) {
+      return undefined;
+    }
+
+    const newGrid = grid.map((row) => [...row]);
+    newGrid[row][col] = dragValue;
+    return newGrid;
   }
 
   return { init };
