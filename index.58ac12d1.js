@@ -140,12 +140,12 @@
       this[globalName] = mainExports;
     }
   }
-})({"aYSqb":[function(require,module,exports) {
+})({"fygJa":[function(require,module,exports) {
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
-var HMR_ENV_HASH = "69f74e7f31319ffd";
-module.bundle.HMR_BUNDLE_ID = "e0a790000286e88d";
+var HMR_ENV_HASH = "4a236f9275d0a351";
+module.bundle.HMR_BUNDLE_ID = "127b235958ac12d1";
 "use strict";
 function _createForOfIteratorHelper(o, allowArrayLike) {
     var it;
@@ -153,7 +153,7 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
         if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
             if (it) o = it;
             var i = 0;
-            var F = function F1() {
+            var F = function F() {
             };
             return {
                 s: F,
@@ -283,7 +283,7 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
         var data = JSON.parse(event.data);
         if (data.type === 'update') {
             // Remove error overlay if there is one
-            removeErrorOverlay();
+            if (typeof document !== 'undefined') removeErrorOverlay();
             var assets = data.assets.filter(function(asset) {
                 return asset.envHash === HMR_ENV_HASH;
             }); // Handle HMR Update
@@ -309,15 +309,18 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
                     var ansiDiagnostic = _step.value;
                     var stack = ansiDiagnostic.codeframe ? ansiDiagnostic.codeframe : ansiDiagnostic.stack;
                     console.error('🚨 [parcel]: ' + ansiDiagnostic.message + '\n' + stack + '\n\n' + ansiDiagnostic.hints.join('\n'));
-                } // Render the fancy html overlay
+                }
             } catch (err) {
                 _iterator.e(err);
             } finally{
                 _iterator.f();
             }
-            removeErrorOverlay();
-            var overlay = createErrorOverlay(data.diagnostics.html); // $FlowFixMe
-            document.body.appendChild(overlay);
+            if (typeof document !== 'undefined') {
+                // Render the fancy html overlay
+                removeErrorOverlay();
+                var overlay = createErrorOverlay(data.diagnostics.html); // $FlowFixMe
+                document.body.appendChild(overlay);
+            }
         }
     };
     ws.onerror = function(e) {
@@ -343,9 +346,9 @@ function createErrorOverlay(diagnostics) {
         for(_iterator2.s(); !(_step2 = _iterator2.n()).done;){
             var diagnostic = _step2.value;
             var stack = diagnostic.codeframe ? diagnostic.codeframe : diagnostic.stack;
-            errorHTML += "\n      <div>\n        <div style=\"font-size: 18px; font-weight: bold; margin-top: 20px;\">\n          \uD83D\uDEA8 ".concat(diagnostic.message, "\n        </div>\n        <pre>\n          ").concat(stack, "\n        </pre>\n        <div>\n          ").concat(diagnostic.hints.map(function(hint) {
-                return '<div>' + hint + '</div>';
-            }).join(''), "\n        </div>\n      </div>\n    ");
+            errorHTML += "\n      <div>\n        <div style=\"font-size: 18px; font-weight: bold; margin-top: 20px;\">\n          \uD83D\uDEA8 ".concat(diagnostic.message, "\n        </div>\n        <pre>").concat(stack, "</pre>\n        <div>\n          ").concat(diagnostic.hints.map(function(hint) {
+                return '<div>💡 ' + hint + '</div>';
+            }).join(''), "\n        </div>\n        ").concat(diagnostic.documentation ? "<div>\uD83D\uDCDD <a style=\"color: violet\" href=\"".concat(diagnostic.documentation, "\" target=\"_blank\">Learn more</a></div>") : '', "\n      </div>\n    ");
         }
     } catch (err) {
         _iterator2.e(err);
@@ -399,18 +402,17 @@ function reloadCSS() {
 function hmrApply(bundle, asset) {
     var modules = bundle.modules;
     if (!modules) return;
-    if (asset.type === 'css') {
-        reloadCSS();
-        return;
+    if (asset.type === 'css') reloadCSS();
+    else if (asset.type === 'js') {
+        var deps = asset.depsByBundle[bundle.HMR_BUNDLE_ID];
+        if (deps) {
+            var fn = new Function('require', 'module', 'exports', asset.output);
+            modules[asset.id] = [
+                fn,
+                deps
+            ];
+        } else if (bundle.parent) hmrApply(bundle.parent, asset);
     }
-    var deps = asset.depsByBundle[bundle.HMR_BUNDLE_ID];
-    if (deps) {
-        var fn = new Function('require', 'module', 'exports', asset.output);
-        modules[asset.id] = [
-            fn,
-            deps
-        ];
-    } else if (bundle.parent) hmrApply(bundle.parent, asset);
 }
 function hmrAcceptCheck(bundle, id, depsByBundle) {
     var modules = bundle.modules;
@@ -421,7 +423,7 @@ function hmrAcceptCheck(bundle, id, depsByBundle) {
         if (!bundle.parent) return true;
         return hmrAcceptCheck(bundle.parent, id, depsByBundle);
     }
-    if (checkedAssets[id]) return;
+    if (checkedAssets[id]) return true;
     checkedAssets[id] = true;
     var cached = bundle.cache[id];
     assetsToAccept.push([
@@ -429,7 +431,9 @@ function hmrAcceptCheck(bundle, id, depsByBundle) {
         id
     ]);
     if (cached && cached.hot && cached.hot._acceptCallbacks.length) return true;
-    return getParents(module.bundle.root, id).some(function(v) {
+    var parents = getParents(module.bundle.root, id); // If no parents, the asset is new. Prevent reloading the page.
+    if (!parents.length) return true;
+    return parents.some(function(v) {
         return hmrAcceptCheck(v[0], v[1], null);
     });
 }
@@ -454,8 +458,9 @@ function hmrAcceptRun(bundle, id) {
     acceptedAssets[id] = true;
 }
 
-},{}],"atUkZ":[function(require,module,exports) {
+},{}],"exVYn":[function(require,module,exports) {
 const { next  } = require('.');
+const { random , create , getPopulation , encode , decode , dim , pad ,  } = require('./demo-grids-helper');
 const graphics = (()=>{
     let previousGrid;
     function render(canvas, grid, cellWidth) {
@@ -504,112 +509,51 @@ const graphics = (()=>{
         requestAnimationFrame
     };
 })();
-const grids = (()=>{
-    function create(w, h, valFunc = (i, j)=>false
-    ) {
-        const grid = [];
-        for(let i = 0; i < h; i++){
-            const r = [];
-            for(let j = 0; j < w; j++)r.push(valFunc(i, j));
-            grid.push(r);
-        }
-        return grid;
-    }
-    function random(w, h, fractionLive = 0.25) {
-        const b = 0.8;
-        return create(w, h, (i, j)=>{
-            return(// Cover only the middle b% of the grid
-            i / h > 1 - b && i / h < b && j / w > 1 - b && j / w < b && Math.random() < fractionLive);
-        });
-    }
-    function getPopulation(grid) {
-        let c = 0;
-        for(let i = 0; i < grid.length; i++){
-            for(let j = 0; j < grid[i].length; j++)if (grid[i][j]) c++;
-        }
-        return c;
-    }
-    return {
-        random,
-        create,
-        getPopulation
-    };
-})();
 const game = (()=>{
     const generationsCountElement = document.getElementById('generations-count');
     const populationCountElement = document.getElementById('population-count');
     const startButtonElement = document.getElementById('start');
     const clearButtonElement = document.getElementById('clear');
+    const resetButtonElement = document.getElementById('reset');
     const randomButtonElement = document.getElementById('random');
     const speedControlElement = document.getElementById('speed');
     const speedValueElement = document.getElementById('speed-value');
     const canvasElement = document.querySelector('canvas');
-    let cellWidthInPixels;
-    let _grid, _isPlaying = false, _numGens = 0, w, h, speed;
+    const hotkeys = {
+        P: onClickPlay,
+        C: onClickClear,
+        R: onClickRandom,
+        O: onClickReset
+    };
+    let cellWidthInPixels, _grid, _initialGrid, _isPlaying = false, _numGens = 0, w, h, speed, isMouseBeingDragged = false, dragValue, isPlayingBeforeDrag;
     function updateGrid(gridFunc) {
-        _grid = gridFunc(_grid);
+        const newGrid = gridFunc(_grid);
+        if (newGrid === undefined) return;
+        console.log(encode(newGrid));
+        _grid = newGrid;
         graphics.render(canvasElement, _grid, cellWidthInPixels);
-        populationCountElement.textContent = String(grids.getPopulation(_grid));
+        populationCountElement.textContent = String(getPopulation(_grid));
     }
     function init() {
-        cellWidthInPixels = getCellWidth();
-        initSpeed();
-        w = Math.ceil(window.innerWidth / cellWidthInPixels);
-        h = Math.ceil(window.innerHeight / cellWidthInPixels);
         startButtonElement.addEventListener('click', onClickPlay);
         clearButtonElement.addEventListener('click', onClickClear);
+        resetButtonElement.addEventListener('click', onClickReset);
         randomButtonElement.addEventListener('click', onClickRandom);
         speedControlElement.addEventListener('change', onChangeSpeed);
         document.addEventListener('keydown', onKeyDown);
-        // Event listeners for dragging
-        {
-            let isMouseBeingDragged = false;
-            let dragValue; // value the cells dragged over should be
-            let isPlayingBeforeDrag;
-            canvasElement.addEventListener('mousedown', (evt)=>{
-                isMouseBeingDragged = true;
-                isPlayingBeforeDrag = _isPlaying;
-                setIsPlaying(false);
-                const { col , row  } = getRowAndCol(evt);
-                dragValue = !_grid[row][col];
-                updateGrid((grid)=>setCellValue(grid, row, col)
-                );
-            });
-            canvasElement.addEventListener('mousemove', (evt)=>{
-                if (isMouseBeingDragged) {
-                    const { col , row  } = getRowAndCol(evt);
-                    updateGrid((grid)=>setCellValue(grid, row, col)
-                    );
-                }
-            });
-            canvasElement.addEventListener('mouseup', (evt)=>{
-                if (isMouseBeingDragged) {
-                    const { col , row  } = getRowAndCol(evt);
-                    updateGrid((grid)=>setCellValue(grid, row, col)
-                    );
-                    isMouseBeingDragged = false;
-                    isPlayingBeforeDrag && setIsPlaying(true);
-                }
-            });
-            function getRowAndCol(evt) {
-                return {
-                    col: Math.floor(evt.clientX / cellWidthInPixels),
-                    row: Math.floor(evt.clientY / cellWidthInPixels)
-                };
-            }
-            function setCellValue(grid, row, col) {
-                if (grid[row][col] === dragValue) return grid;
-                const newGrid = grid.map((row1)=>[
-                        ...row1
-                    ]
-                );
-                newGrid[row][col] = dragValue;
-                return newGrid;
-            }
-        }
+        canvasElement.addEventListener('mousedown', onMousedownCanvas);
+        canvasElement.addEventListener('mousemove', onMousemoveCanvas);
+        canvasElement.addEventListener('mouseup', onMouseupCanvas);
         graphics.resizeCanvasToDisplaySize(canvasElement);
         // Start game
-        updateGrid(()=>grids.create(w, h)
+        initSpeed();
+        initButtons();
+        const { grid: initialGrid , cellWidthInPixels: cellWidth  } = getInitialGrid();
+        cellWidthInPixels = cellWidth;
+        _initialGrid = initialGrid;
+        h = initialGrid.length;
+        w = initialGrid[0].length;
+        updateGrid(()=>initialGrid
         );
         graphics.requestAnimationFrame(()=>{
             if (_isPlaying) {
@@ -620,20 +564,45 @@ const game = (()=>{
         }, ()=>speed * 1000
         );
     }
-    function getCellWidth() {
+    function getInitialGrid() {
+        const url = new URL(window.location.href);
+        const init = url.searchParams.get('init');
+        if (init) {
+            const decodedGrid = decode(init);
+            const decodedH = decodedGrid.length;
+            const decodedW = decodedGrid[0] ? decodedGrid[0].length : 0;
+            const cellWidthInPixels = getCellWidth(true, decodedW, decodedH);
+            const padW = Math.ceil((window.innerWidth - cellWidthInPixels * decodedW) / cellWidthInPixels);
+            const padH = Math.ceil((window.innerHeight - cellWidthInPixels * decodedH) / cellWidthInPixels);
+            return {
+                grid: pad(decodedGrid, padW, padH),
+                cellWidthInPixels
+            };
+        } else {
+            const cellWidthInPixels = getCellWidth(false);
+            return {
+                grid: create(Math.ceil(window.innerWidth / cellWidthInPixels), Math.ceil(window.innerHeight / cellWidthInPixels)),
+                cellWidthInPixels
+            };
+        }
+    }
+    function initButtons() {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('random') === 'false') randomButtonElement.style.display = 'none';
+        if (url.searchParams.get('clear') === 'false') clearButtonElement.style.display = 'none';
+        if (url.searchParams.get('reset') === 'true') resetButtonElement.style.display = 'block';
+    }
+    function getCellWidth(gridSetFromUrl, w, h) {
+        if (gridSetFromUrl) return Math.ceil(Math.min(window.innerHeight / +h, window.innerWidth / +w));
         const url = new URL(window.location.href);
         const size = url.searchParams.get('size');
-        switch(size){
-            case 'lg':
-                return Math.max(50, Math.max(window.innerHeight / 50, window.innerWidth / 50));
-            default:
-                return 20;
-        }
+        if (size === 'lg') return Math.max(50, Math.max(window.innerHeight / 50, window.innerWidth / 50));
+        return 20;
     }
     function initSpeed() {
         const url = new URL(window.location.href);
-        const speed1 = +url.searchParams.get('speed') || 1;
-        updateSpeed(speed1);
+        const speed = +url.searchParams.get('speed') || 1;
+        updateSpeed(speed);
     }
     function onChangeSpeed(evt) {
         const gensPerSec = Math.pow(evt.target.value, 2); // from 0.1->7.07 to 0.01->50
@@ -645,33 +614,28 @@ const game = (()=>{
         speedControlElement.value = Math.pow(gensPerSec, 0.5);
     }
     function onKeyDown(evt) {
-        if (!evt.ctrlKey && !evt.metaKey) switch(evt.key){
-            case 'p':
-            case 'P':
-                onClickPlay();
-                break;
-            case 'c':
-            case 'C':
-                onClickClear();
-                break;
-            case 'r':
-            case 'R':
-                onClickRandom();
-                break;
+        if (!evt.ctrlKey && !evt.metaKey) {
+            const func = hotkeys[evt.key.toUpperCase()];
+            func && func();
         }
     }
     function onClickPlay() {
         toggleIsPlaying();
     }
+    function onClickReset() {
+        resetNumGens();
+        updateGrid(()=>_initialGrid
+        );
+    }
     function onClickClear() {
         setIsPlaying(false);
         resetNumGens();
-        updateGrid(()=>grids.create(w, h)
+        updateGrid(()=>create(w, h)
         );
     }
     function onClickRandom() {
         resetNumGens();
-        updateGrid(()=>grids.random(w, h)
+        updateGrid(()=>random(w, h)
         );
     }
     function incrNumGens() {
@@ -688,13 +652,56 @@ const game = (()=>{
         _isPlaying = isPlaying;
         startButtonElement.textContent = _isPlaying ? 'Pause (P)' : 'Play (P)';
     }
+    function onMousedownCanvas(evt) {
+        // left-click
+        if (evt.buttons === 1) {
+            isMouseBeingDragged = true;
+            isPlayingBeforeDrag = _isPlaying;
+            setIsPlaying(false);
+            const { col , row  } = getRowAndCol(evt);
+            dragValue = !_grid[row][col];
+            updateGrid((grid)=>setCellValue(grid, row, col)
+            );
+        }
+    }
+    function onMousemoveCanvas(evt) {
+        if (isMouseBeingDragged) {
+            const { col , row  } = getRowAndCol(evt);
+            updateGrid((grid)=>setCellValue(grid, row, col)
+            );
+        }
+    }
+    function onMouseupCanvas(evt) {
+        if (isMouseBeingDragged) {
+            const { col , row  } = getRowAndCol(evt);
+            updateGrid((grid)=>setCellValue(grid, row, col)
+            );
+            isMouseBeingDragged = false;
+            isPlayingBeforeDrag && setIsPlaying(true);
+        }
+    }
+    function getRowAndCol(evt) {
+        return {
+            col: Math.floor(evt.clientX / cellWidthInPixels),
+            row: Math.floor(evt.clientY / cellWidthInPixels)
+        };
+    }
+    function setCellValue(grid, row, col) {
+        if (grid[row][col] === dragValue) return undefined;
+        const newGrid = grid.map((row)=>[
+                ...row
+            ]
+        );
+        newGrid[row][col] = dragValue;
+        return newGrid;
+    }
     return {
         init
     };
 })();
 game.init();
 
-},{".":"29JuH"}],"29JuH":[function(require,module,exports) {
+},{".":"7BQdY","./demo-grids-helper":"dcTqh"}],"7BQdY":[function(require,module,exports) {
 function next(grid) {
     const nextGrid = new Array(grid.length);
     for(let i = 0; i < grid.length; i++)nextGrid[i] = new Array(grid[i].length);
@@ -711,6 +718,147 @@ module.exports = {
     next
 };
 
-},{}]},["aYSqb","atUkZ"], "atUkZ", "parcelRequire4bfa")
+},{}],"dcTqh":[function(require,module,exports) {
+function create(w, h, valFunc = (i, j)=>false
+) {
+    const grid = [];
+    for(let i = 0; i < h; i++){
+        const r = [];
+        for(let j = 0; j < w; j++)r.push(valFunc(i, j));
+        grid.push(r);
+    }
+    return grid;
+}
+function random(w, h, fractionLive = 0.25) {
+    const b = 0.8;
+    return create(w, h, (i, j)=>{
+        return(// Cover only the middle b% of the grid
+        i / h > 1 - b && i / h < b && j / w > 1 - b && j / w < b && Math.random() < fractionLive);
+    });
+}
+function getPopulation(grid) {
+    let c = 0;
+    for(let i = 0; i < grid.length; i++){
+        for(let j = 0; j < grid[i].length; j++)if (grid[i][j]) c++;
+    }
+    return c;
+}
+const rowSeparator = ',';
+const columnSeparator = '-';
+function encode(grid) {
+    let s = '';
+    for(let i = 0; i < grid.length; i++){
+        let r = '';
+        let curr;
+        let currCount = 0;
+        for(let j = 0; j < grid[i].length; j++){
+            const c = grid[i][j];
+            if (curr !== c) {
+                if (curr !== undefined) r += currCount + (curr ? 'l' : 'd') + columnSeparator;
+                curr = c;
+                currCount = 0;
+            }
+            currCount++;
+            if (j === grid[i].length - 1) r += (currCount++) + (curr ? 'l' : 'd') + columnSeparator;
+        }
+        s += r + rowSeparator;
+    }
+    return s;
+}
+function decode(str) {
+    const grid = [];
+    str.split(rowSeparator).forEach((row)=>{
+        if (row) {
+            const cells = [];
+            row.split(columnSeparator).forEach((cell)=>{
+                if (cell) {
+                    const [, count, type] = cell.split(/([0-9]+)/);
+                    for(let i = 0; i < count; i++)cells.push(type === 'l' ? true : false);
+                }
+            });
+            grid.push(cells);
+        }
+    });
+    return grid;
+}
+function trim(grid) {
+    return compose(grid, trimTop, mirror, trimTop, mirror, transpose, trimTop, mirror, trimTop, mirror, transpose);
+}
+function trimTop(grid) {
+    let p = -2;
+    for(let i = 0; i < grid.length; i++){
+        if (!empty(grid[i])) break;
+        p++;
+    }
+    return grid.filter((_, i)=>i >= p
+    );
+}
+function dim(str) {
+    const grid = decode(str);
+    return {
+        rows: grid.length,
+        cols: grid[0].length
+    };
+}
+function pad(grid, w, h) {
+    return compose(grid, append(h / 2), mirror, append(h / 2), mirror, transpose, append(w / 2), mirror, append(w / 2), mirror, transpose);
+}
+function append(l) {
+    return (grid)=>{
+        for(let i = 0; i < l; i++)grid = [
+            ...grid,
+            Array.from({
+                length: grid[0].length
+            }, ()=>false
+            )
+        ];
+        return grid;
+    };
+}
+function compose(v, ...p) {
+    p.forEach((f)=>{
+        v = f(v);
+    });
+    return v;
+}
+function empty(cells) {
+    return !cells.some((cell)=>cell
+    );
+}
+function transpose(grid) {
+    return grid[0].map((_, colIndex)=>grid.map((row)=>row[colIndex]
+        )
+    );
+}
+function mirror(grid) {
+    return grid.map((_, i)=>grid[grid.length - 1 - i]
+    );
+}
+function slice(grid, n) {
+    return grid.filter((_, i)=>i < n
+    );
+}
+function sliceBounds(grid, w, h) {
+    return compose(grid, (grid)=>slice(grid, h)
+    , transpose, (grid)=>slice(grid, w)
+    , transpose);
+}
+module.exports = {
+    random,
+    create,
+    getPopulation,
+    encode,
+    decode,
+    dim,
+    pad,
+    trim,
+    sliceBounds,
+    compose,
+    mirror,
+    append,
+    transpose
+};
 
-//# sourceMappingURL=index.0286e88d.js.map
+},{}]},["fygJa","exVYn"], "exVYn", "parcelRequire4bfa")
+
+//# sourceMappingURL=index.58ac12d1.js.map
