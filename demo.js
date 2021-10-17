@@ -1,16 +1,18 @@
-const { next } = require('.');
+const { next } = require('./life');
 const {
   random,
   create,
   getPopulation,
-  encode,
   decode,
-  dim,
   pad,
 } = require('./demo-grids-helper');
 
 const graphics = (() => {
   let previousGrid;
+  const strokeColor = '#bbbbbb';
+  const strokeWidth = 1;
+  const liveColor = '#000000';
+  const deadColor = '#ffffff';
 
   function render(canvas, grid, cellWidth) {
     const ctx = canvas.getContext('2d');
@@ -22,9 +24,9 @@ const graphics = (() => {
         // Only re-draw if cell has changed
         if (!previousGrid || cell !== previousGrid[i][j]) {
           ctx.beginPath();
-          ctx.strokeStyle = '#555555';
-          ctx.fillStyle = cell ? '#ffffff' : '#000000';
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = strokeColor;
+          ctx.fillStyle = cell ? liveColor : deadColor;
+          ctx.lineWidth = strokeWidth;
           ctx.rect(j * cellWidth, i * cellWidth, cellWidth, cellWidth);
           ctx.fill();
           ctx.stroke();

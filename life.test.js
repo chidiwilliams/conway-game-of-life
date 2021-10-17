@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { next } = require('.');
+const { next } = require('./life');
 
 assert.deepStrictEqual(
   next([
