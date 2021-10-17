@@ -101,7 +101,6 @@ const game = (() => {
       return;
     }
 
-    console.log(encode(newGrid));
     _grid = newGrid;
     graphics.render(canvasElement, _grid, cellWidthInPixels);
     populationCountElement.textContent = String(getPopulation(_grid));
