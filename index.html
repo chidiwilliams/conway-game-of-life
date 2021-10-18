@@ -36,17 +36,22 @@
         flex: 1;
       }
 
+      .game-controls-wrapper {
+        position: absolute;
+        bottom: 12px;
+        left: 0;
+        right: 0;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 0 12px;
+      }
+
       .game__controls {
-        padding: 12px;
+        padding: 10px;
         border: solid 1px #777777;
         border-radius: 3px;
         background: #191919bb;
-        position: absolute;
-        bottom: 20px;
-        left: 0;
-        right: 0;
-        width: 400px;
-        margin: 0 auto;
+        box-shadow: 0 3px 5px #55555555;
         text-align: center;
       }
 
@@ -57,13 +62,22 @@
 
       .game-controls__buttons {
         display: flex;
-        margin-bottom: 8px;
+        flex-wrap: wrap;
       }
 
       .game-controls__buttons > button {
-        flex: 1;
+        flex: 1 100px;
         padding: 8px;
-        margin: 0 4px;
+        margin: 0 4px 10px;
+        font-size: 1rem;
+        -webkit-appearance: none;
+        -webkit-border-radius: none;
+        border-radius: 3px;
+        border: 0;
+      }
+
+      .game-controls__buttons > button#reset {
+        display: none;
       }
 
       .game-controls__details {
@@ -82,31 +96,29 @@
       span {
         font-weight: bold;
       }
-
-      button#reset {
-        display: none;
-      }
     </style>
   </head>
 
   <body>
     <div class="game">
       <canvas class="game__display"></canvas>
-      <div class="game__controls">
-        <div class="game-controls__title">Conway's Game of Life</div>
-        <div class="game-controls__buttons">
-          <button id="start">Play (P)</button>
-          <button id="random">Random (R)</button>
-          <button id="clear">Clear (C)</button>
-          <button id="reset">Reset (O)</button>
-        </div>
-        <div class="game-controls__details">
-          <div>Generations: <span id="generations-count">0</span></div>
-          <div>Population: <span id="population-count">0</span></div>
-        </div>
-        <div class="speed-control">
-          <div>Speed: <span id="speed-value">1</span> generation(s)/sec</div>
-          <input type="range" id="speed" min="0.1" max="7.07" step="0.1" />
+      <div class="game-controls-wrapper">
+        <div class="game__controls">
+          <div class="game-controls__title">Conway's Game of Life</div>
+          <div class="game-controls__buttons">
+            <button id="start">Play (P)</button>
+            <button id="random">Random (R)</button>
+            <button id="clear">Clear (C)</button>
+            <button id="reset">Reset (O)</button>
+          </div>
+          <div class="game-controls__details">
+            <div>Generations: <span id="generations-count">0</span></div>
+            <div>Population: <span id="population-count">0</span></div>
+          </div>
+          <div class="speed-control">
+            <div>Speed: <span id="speed-value">1</span> generation(s)/sec</div>
+            <input type="range" id="speed" min="0.1" max="7.07" step="0.1" />
+          </div>
         </div>
       </div>
     </div>

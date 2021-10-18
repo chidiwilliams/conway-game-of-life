@@ -78,6 +78,7 @@ const game = (() => {
   const speedValueElement = document.getElementById('speed-value');
   const canvasElement = document.querySelector('canvas');
 
+  const defaultGensPerSecond = 20;
   const hotkeys = {
     P: onClickPlay,
     C: onClickClear,
@@ -208,7 +209,7 @@ const game = (() => {
 
   function initSpeed() {
     const url = new URL(window.location.href);
-    const speed = +url.searchParams.get('speed') || 1;
+    const speed = +url.searchParams.get('speed') || defaultGensPerSecond;
     updateSpeed(speed);
   }
 
