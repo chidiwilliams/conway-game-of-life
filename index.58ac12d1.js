@@ -459,10 +459,14 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"exVYn":[function(require,module,exports) {
-const { next  } = require('.');
-const { random , create , getPopulation , encode , decode , dim , pad ,  } = require('./demo-grids-helper');
+const { next  } = require('./life');
+const { random , create , getPopulation , decode , pad ,  } = require('./demo-grids-helper');
 const graphics = (()=>{
     let previousGrid;
+    const strokeColor = '#bbbbbb';
+    const strokeWidth = 1;
+    const liveColor = '#000000';
+    const deadColor = '#ffffff';
     function render(canvas, grid, cellWidth) {
         const ctx = canvas.getContext('2d');
         for(let i = 0; i < grid.length; i++)for(let j = 0; j < grid[i].length; j++){
@@ -470,9 +474,9 @@ const graphics = (()=>{
             // Only re-draw if cell has changed
             if (!previousGrid || cell !== previousGrid[i][j]) {
                 ctx.beginPath();
-                ctx.strokeStyle = '#555555';
-                ctx.fillStyle = cell ? '#ffffff' : '#000000';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = strokeColor;
+                ctx.fillStyle = cell ? liveColor : deadColor;
+                ctx.lineWidth = strokeWidth;
                 ctx.rect(j * cellWidth, i * cellWidth, cellWidth, cellWidth);
                 ctx.fill();
                 ctx.stroke();
@@ -519,6 +523,7 @@ const game = (()=>{
     const speedControlElement = document.getElementById('speed');
     const speedValueElement = document.getElementById('speed-value');
     const canvasElement = document.querySelector('canvas');
+    const defaultGensPerSecond = 20;
     const hotkeys = {
         P: onClickPlay,
         C: onClickClear,
@@ -529,7 +534,6 @@ const game = (()=>{
     function updateGrid(gridFunc) {
         const newGrid = gridFunc(_grid);
         if (newGrid === undefined) return;
-        console.log(encode(newGrid));
         _grid = newGrid;
         graphics.render(canvasElement, _grid, cellWidthInPixels);
         populationCountElement.textContent = String(getPopulation(_grid));
@@ -601,7 +605,7 @@ const game = (()=>{
     }
     function initSpeed() {
         const url = new URL(window.location.href);
-        const speed = +url.searchParams.get('speed') || 1;
+        const speed = +url.searchParams.get('speed') || defaultGensPerSecond;
         updateSpeed(speed);
     }
     function onChangeSpeed(evt) {
@@ -701,24 +705,7 @@ const game = (()=>{
 })();
 game.init();
 
-},{".":"7BQdY","./demo-grids-helper":"dcTqh"}],"7BQdY":[function(require,module,exports) {
-function next(grid) {
-    const nextGrid = new Array(grid.length);
-    for(let i = 0; i < grid.length; i++)nextGrid[i] = new Array(grid[i].length);
-    for(let x = 0; x < grid.length; x++)for(let y = 0; y < grid[x].length; y++){
-        let c = 0;
-        for(let dx = -1; dx <= 1; dx++){
-            for(let dy = -1; dy <= 1; dy++)if (!(dx === 0 && dy === 0) && typeof grid[x + dx] !== 'undefined' && typeof grid[x + dx][y + dy] !== 'undefined' && grid[x + dx][y + dy]) c++;
-        }
-        nextGrid[x][y] = grid[x][y] ? c === 2 || c === 3 : c === 3;
-    }
-    return nextGrid;
-}
-module.exports = {
-    next
-};
-
-},{}],"dcTqh":[function(require,module,exports) {
+},{"./demo-grids-helper":"dcTqh","./life":"bAcvN"}],"dcTqh":[function(require,module,exports) {
 function create(w, h, valFunc = (i, j)=>false
 ) {
     const grid = [];
@@ -857,6 +844,23 @@ module.exports = {
     mirror,
     append,
     transpose
+};
+
+},{}],"bAcvN":[function(require,module,exports) {
+function next(grid) {
+    const nextGrid = new Array(grid.length);
+    for(let i = 0; i < grid.length; i++)nextGrid[i] = new Array(grid[i].length);
+    for(let x = 0; x < grid.length; x++)for(let y = 0; y < grid[x].length; y++){
+        let c = 0;
+        for(let dx = -1; dx <= 1; dx++){
+            for(let dy = -1; dy <= 1; dy++)if (!(dx === 0 && dy === 0) && typeof grid[x + dx] !== 'undefined' && typeof grid[x + dx][y + dy] !== 'undefined' && grid[x + dx][y + dy]) c++;
+        }
+        nextGrid[x][y] = grid[x][y] ? c === 2 || c === 3 : c === 3;
+    }
+    return nextGrid;
+}
+module.exports = {
+    next
 };
 
 },{}]},["fygJa","exVYn"], "exVYn", "parcelRequire4bfa")
