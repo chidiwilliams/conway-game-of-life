@@ -60,6 +60,10 @@
         margin-bottom: 12px;
       }
 
+      .game-controls__title a {
+        color: unset;
+      }
+
       .game-controls__buttons {
         display: flex;
         flex-wrap: wrap;
@@ -105,7 +109,11 @@
       <canvas class="game__display"></canvas>
       <div class="game-controls-wrapper">
         <div class="game__controls">
-          <div class="game-controls__title">Conway's Game of Life</div>
+          <div class="game-controls__title">
+            <a href="https://github.com/chidiwilliams/conway-game-of-life">
+              Conway's Game of Life
+            </a>
+          </div>
           <div class="game-controls__buttons">
             <button id="start">Play (P)</button>
             <button id="random">Random (R)</button>

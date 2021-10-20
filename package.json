@@ -1,7 +1,7 @@
 {
   "name": "conway-game-of-life",
   "version": "1.0.0",
-  "description": "Template for simulation repositories",
+  "description": "Conway's Game of Life",
   "scripts": {
     "test": "node index.test.js",
     "dev": "parcel index.html",
