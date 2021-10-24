@@ -548,6 +548,7 @@ const game = (()=>{
         canvasElement.addEventListener('mousedown', onMousedownCanvas);
         canvasElement.addEventListener('mousemove', onMousemoveCanvas);
         canvasElement.addEventListener('mouseup', onMouseupCanvas);
+        canvasElement.addEventListener('touchstart', onTouchstartCanvas);
         graphics.resizeCanvasToDisplaySize(canvasElement);
         // Start game
         initSpeed();
@@ -657,6 +658,7 @@ const game = (()=>{
         startButtonElement.textContent = _isPlaying ? 'Pause (P)' : 'Play (P)';
     }
     function onMousedownCanvas(evt) {
+        evt.preventDefault();
         // left-click
         if (evt.buttons === 1) {
             isMouseBeingDragged = true;
@@ -683,6 +685,13 @@ const game = (()=>{
             isMouseBeingDragged = false;
             isPlayingBeforeDrag && setIsPlaying(true);
         }
+    }
+    function onTouchstartCanvas(evt) {
+        evt.preventDefault();
+        const { col , row  } = getRowAndCol(evt.touches[0]);
+        dragValue = !_grid[row][col];
+        updateGrid((grid)=>setCellValue(grid, row, col)
+        );
     }
     function getRowAndCol(evt) {
         return {
