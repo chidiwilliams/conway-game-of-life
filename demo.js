@@ -122,6 +122,8 @@ const game = (() => {
     canvasElement.addEventListener('mousemove', onMousemoveCanvas);
     canvasElement.addEventListener('mouseup', onMouseupCanvas);
     canvasElement.addEventListener('touchstart', onTouchstartCanvas);
+    canvasElement.addEventListener('touchmove', onTouchmoveCanvas);
+    canvasElement.addEventListener('touchend', onTouchendCanvas);
 
     graphics.resizeCanvasToDisplaySize(canvasElement);
 
@@ -273,19 +275,38 @@ const game = (() => {
   function onMousedownCanvas(evt) {
     evt.preventDefault();
 
-    // left-click
+    // only left-click
     if (evt.buttons === 1) {
-      isMouseBeingDragged = true;
-      isPlayingBeforeDrag = _isPlaying;
-      setIsPlaying(false);
-
-      const { col, row } = getRowAndCol(evt);
-      dragValue = !_grid[row][col];
-      updateGrid((grid) => setCellValue(grid, row, col));
+      mousedownOrTouchstartCanvas(evt);
     }
   }
 
+  function onTouchstartCanvas(evt) {
+    evt.preventDefault();
+    mousedownOrTouchstartCanvas(evt.touches[0]);
+  }
+
+  function mousedownOrTouchstartCanvas(evt) {
+    isMouseBeingDragged = true;
+    isPlayingBeforeDrag = _isPlaying;
+    setIsPlaying(false);
+
+    const { col, row } = getRowAndCol(evt);
+    dragValue = !_grid[row][col];
+    updateGrid((grid) => setCellValue(grid, row, col));
+  }
+
   function onMousemoveCanvas(evt) {
+    evt.preventDefault();
+    mousemoveOrTouchmoveCanvas(evt);
+  }
+
+  function onTouchmoveCanvas(evt) {
+    evt.preventDefault();
+    mousemoveOrTouchmoveCanvas(evt.touches[0]);
+  }
+
+  function mousemoveOrTouchmoveCanvas(evt) {
     if (isMouseBeingDragged) {
       const { col, row } = getRowAndCol(evt);
       updateGrid((grid) => setCellValue(grid, row, col));
@@ -293,6 +314,7 @@ const game = (() => {
   }
 
   function onMouseupCanvas(evt) {
+    evt.preventDefault();
     if (isMouseBeingDragged) {
       const { col, row } = getRowAndCol(evt);
       updateGrid((grid) => setCellValue(grid, row, col));
@@ -302,12 +324,9 @@ const game = (() => {
     }
   }
 
-  function onTouchstartCanvas(evt) {
+  function onTouchendCanvas(evt) {
     evt.preventDefault();
-
-    const { col, row } = getRowAndCol(evt.touches[0]);
-    dragValue = !_grid[row][col];
-    updateGrid((grid) => setCellValue(grid, row, col));
+    isMouseBeingDragged && isPlayingBeforeDrag && setIsPlaying(true);
   }
 
   function getRowAndCol(evt) {
