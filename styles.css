@@ -1,0 +1,94 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+.game {
+  background: #222222;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.game__display {
+  flex: 1;
+}
+
+.game-controls-wrapper {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+.game__controls {
+  padding: 10px;
+  border: solid 1px #777777;
+  border-radius: 3px;
+  background: #191919bb;
+  box-shadow: 0 3px 5px #55555555;
+  text-align: center;
+}
+
+.game-controls__title {
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.game-controls__title a {
+  color: unset;
+}
+
+.game-controls__buttons {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.game-controls__buttons > button {
+  flex: 1 100px;
+  padding: 8px;
+  margin: 0 4px 10px;
+  font-size: 1rem;
+  -webkit-appearance: none;
+  -webkit-border-radius: none;
+  border-radius: 3px;
+  border: 0;
+  color: #222222;
+}
+
+.game-controls__buttons > button#reset {
+  display: none;
+}
+
+.game-controls__details {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.game-controls__details > * {
+  flex: 1;
+}
+
+svg {
+  display: block;
+}
+
+span {
+  font-weight: bold;
+}
